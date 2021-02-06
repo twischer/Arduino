@@ -30,6 +30,15 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 	Uart_Init(0);
 	ets_install_uart_printf(0);
 
+	if (boot_from_flash() != 0) {
+		// TODO runs int this if condition
+		ets_printf("%s %s \n", "ets_main.c", "181");
+		while (true);
+	}
+	user_start_fptr();
+	while (true);
+
+
 	boot_from_something_uart_dwnld(&user_start_fptr);
 
 	if (user_start_fptr == NULL) {
@@ -66,16 +75,6 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 [[noreturn]] void ICACHE_RAM_ATTR system_restart_core_uart_dwnld()
 {
 	Wait_SPI_Idle(flashchip);
-	ets_install_uart_printf(0);
-
-	if (boot_from_flash() != 0) {
-		// TODO runs int this if condition
-		ets_printf("%s %s \n", "ets_main.c", "181");
-		while (true);
-	}
-	user_start_fptr();
-	while (true);
-
 
 	// TODO exception when calling uart_div_modify()
 	//Cache_Read_Disable();
