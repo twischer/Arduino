@@ -30,17 +30,10 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 	Uart_Init(0);
 	ets_install_uart_printf(0);
 
-	if (boot_from_flash() != 0) {
-		// TODO runs int this if condition
-		ets_printf("%s %s \n", "ets_main.c", "181");
-		while (true);
-	}
-	user_start_fptr();
-	while (true);
-
-
 	boot_from_something_uart_dwnld(&user_start_fptr);
 
+	// 0x4010e004 in case of esptool.py flasher stub
+	ets_printf("\n\n user_start_fptr *%p = %p\n", &user_start_fptr, user_start_fptr);
 	if (user_start_fptr == NULL) {
 		if (boot_from_flash() != 0) {
 			ets_printf("%s %s \n", "ets_main.c", "181");
@@ -60,10 +53,12 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 	//Cache_Read_Disable();
 	//CLEAR_PERI_REG_MASK(PERIPHS_DPORT_24, 0x18);
 
+	// 0x4010f498 in case of esptool.py --no-stub ...
+	ets_printf("\n\n user_start_fptr *%p = %p\n", &user_start_fptr, user_start_fptr);
 	if (user_start_fptr) {
 		// TODO fails with an exception
 		// Fatal exception (0):
-		// epc1=0x4010f45c, epc2=0x00000000, epc3=0x00000000, excvaddr=0x00000000, depc=0x00000000
+		// epc1=0x4010f498, epc2=0x00000000, epc3=0x00000000, excvaddr=0x00000000, depc=0x00000000
 		// May be execution flag is not set for memory region
 		user_start_fptr();
 	}
