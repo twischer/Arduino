@@ -75,6 +75,16 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 
 [[noreturn]] void system_restart_local_uart_dwnld()
 {
+	ets_install_uart_printf(0);
+
+	if (boot_from_flash() != 0) {
+		// TODO runs int this if condition
+		ets_printf("%s %s \n", "ets_main.c", "181");
+		while (true);
+	}
+	user_start_fptr();
+	while (true);
+
 	if (system_func1(0x4) == -1) {
 		clockgate_watchdog(0);
 		SET_PERI_REG_MASK(PERIPHS_DPORT_18, 0xffff00ff);
