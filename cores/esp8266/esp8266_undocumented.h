@@ -7,12 +7,15 @@
 extern "C" {
 #endif
 #include <stdint.h>
+#include <eagle_soc.h>
 #include <spi_flash.h>
 
-#define PERIPHS_DPORT_18	(PERIPHS_DPORT_BASEADDR + 0x018)
-#define PERIPHS_DPORT_24	(PERIPHS_DPORT_BASEADDR + 0x024)
-#define PERIPHS_HW_WDT		(0x60000900)
-#define PERIPHS_I2C_48		(0x60000a00 + 0x348)
+#define PERIPHS_DPORT_18		(PERIPHS_DPORT_BASEADDR + 0x018)
+#define PERIPHS_DPORT_IRAM_MAPPING	(PERIPHS_DPORT_BASEADDR + 0x024)
+#define IRAM_UNMAP_40108000		BIT4
+#define IRAM_UNMAP_4010C000		BIT3
+#define PERIPHS_HW_WDT			(0x60000900)
+#define PERIPHS_I2C_48			(0x60000a00 + 0x348)
 
 
 extern void (*user_start_fptr)();

@@ -72,30 +72,29 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 	Wait_SPI_Idle(flashchip);
 
 	// TODO exception when calling uart_div_modify()
-	//Cache_Read_Disable();
-	//CLEAR_PERI_REG_MASK(PERIPHS_DPORT_24, 0x18);
-	main_uart_dwnld();
+	Cache_Read_Disable();
+	CLEAR_PERI_REG_MASK(PERIPHS_DPORT_IRAM_MAPPING, IRAM_UNMAP_40108000 | IRAM_UNMAP_4010C000);
+
+	ets_install_uart_printf(0);
+	typedef union {
+		uint32_t v32;
+		uint8_t v8[4];
+	} conv_t;
+
+	uint32_t* ptr = (uint32_t*)0x4010f498;
+	for (int i=0; i<32/4; i++) {
+		conv_t v = { .v32=ptr[i] };
+		ets_printf("%02x%02x%02x%02x", v.v8[0], v.v8[1], v.v8[2], v.v8[3]);
+	}
+
+	user_start_fptr = (void(*)())0x4010f498;
+	user_start_fptr();
+	while (true);
+	//main_uart_dwnld();
 }
 
 [[noreturn]] void system_restart_local_uart_dwnld()
 {
-	// Fails with
-	// Exception (0):
-	// epc1=0x4010f498 epc2=0x00000000 epc3=0x00000000 excvaddr=0x00000000 depc=0x00000000
-	// >>>stack>>>
-	// ctx: cont
-	// sp: 3ffef6e0 end: 3ffef8d0 offset: 0190
-	// 3ffef870:  4022973e 042c1d80 3ffee734 40203bcc
-	// 3ffef880:  40202b61 000003e8 3ffef914 40202b78
-	// 3ffef890:  3fffdad0 3ffee714 3ffee734 40202b51
-	// 3ffef8a0:  00000000 000f000f 00000000 feefeffe
-	// 3ffef8b0:  feefeffe 3ffee714 3ffef900 40204778
-	// 3ffef8c0:  feefeffe feefeffe 3ffe85cc 401001e1
-	// <<<stack<<<
-	user_start_fptr = (void(*)())0x4010f498;
-	user_start_fptr();
-	while (true);
-
 	if (system_func1(0x4) == -1) {
 		clockgate_watchdog(0);
 		SET_PERI_REG_MASK(PERIPHS_DPORT_18, 0xffff00ff);
