@@ -66,15 +66,6 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 [[noreturn]] void ICACHE_RAM_ATTR system_restart_core_uart_dwnld()
 {
 	Wait_SPI_Idle(flashchip);
-
-	// TODO exception when calling uart_div_modify()
-	//Cache_Read_Disable();
-	//CLEAR_PERI_REG_MASK(PERIPHS_DPORT_24, 0x18);
-	main_uart_dwnld();
-}
-
-[[noreturn]] void system_restart_local_uart_dwnld()
-{
 	ets_install_uart_printf(0);
 
 	if (boot_from_flash() != 0) {
@@ -85,6 +76,15 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 	user_start_fptr();
 	while (true);
 
+
+	// TODO exception when calling uart_div_modify()
+	//Cache_Read_Disable();
+	//CLEAR_PERI_REG_MASK(PERIPHS_DPORT_24, 0x18);
+	main_uart_dwnld();
+}
+
+[[noreturn]] void system_restart_local_uart_dwnld()
+{
 	if (system_func1(0x4) == -1) {
 		clockgate_watchdog(0);
 		SET_PERI_REG_MASK(PERIPHS_DPORT_18, 0xffff00ff);
