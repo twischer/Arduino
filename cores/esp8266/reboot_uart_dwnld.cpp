@@ -27,7 +27,7 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 	Uart_Init(0);
 	ets_install_uart_printf(0);
 
-	SET_PERI_REG_MASK(PERIPHS_DPORT_IRAM_MAPPING, IRAM_UNMAP_40108000 | IRAM_UNMAP_4010C000);
+	//SET_PERI_REG_MASK(PERIPHS_DPORT_IRAM_MAPPING, IRAM_UNMAP_40108000 | IRAM_UNMAP_4010C000);
 	boot_from_something_uart_dwnld(&user_start_fptr);
 
 	if (user_start_fptr == NULL) {
@@ -46,6 +46,15 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 	_xtos_set_exception_handler(EXCCAUSE_PRIVILEGED, print_fatal_exc_handler);
 
 	if (user_start_fptr) {
+		ets_printf("\n\n%p\n", user_start_fptr);
+		uint32_t* data = (uint32_t*)0x4010e000;
+		for (uint32_t i=0; i<0xD0/4; i++) {
+			uint32_t tmp = data[i];
+			uint8_t* tmp8 = (uint8_t*)&tmp;
+			ets_printf("0x%02x 0x%02x 0x%02x 0x%02x ", tmp8[0], tmp8[1], tmp8[2], tmp8[3]);
+		}
+		ets_printf("\n\n\n");
+
 		user_start_fptr();
 	}
 
