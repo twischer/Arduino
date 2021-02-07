@@ -23,19 +23,12 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 
 [[noreturn]] void ICACHE_RAM_ATTR main_uart_dwnld()
 {
-	// TODO may be it is part of _start()
-	// at least ets_intr_lock() is called in system_restart_local()
-	// Therefore unlock it here again to enable UART Rx IRQ
-	//ets_intr_unlock();
-
 	uartAttach();
 	Uart_Init(0);
 	ets_install_uart_printf(0);
 
 	boot_from_something_uart_dwnld(&user_start_fptr);
 
-	// 0x4010e004 in case of esptool.py flasher stub
-	ets_printf("\n\n user_start_fptr *%p = %p\n", &user_start_fptr, user_start_fptr);
 	if (user_start_fptr == NULL) {
 		if (boot_from_flash() != 0) {
 			ets_printf("%s %s \n", "ets_main.c", "181");
@@ -51,62 +44,7 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 	_xtos_set_exception_handler(EXCCAUSE_STORE_PROHIBITED, print_fatal_exc_handler);
 	_xtos_set_exception_handler(EXCCAUSE_PRIVILEGED, print_fatal_exc_handler);
 
-	/* Moved from system_restart_core_uart_dwnld(). Not sure if it is required */
-	//Cache_Read_Disable();
-	//CLEAR_PERI_REG_MASK(PERIPHS_DPORT_IRAM_MAPPING, IRAM_UNMAP_40108000 | IRAM_UNMAP_4010C000);
-
-	// 0x4010f498 in case of esptool.py --no-stub ...
-	ets_printf("\n\n user_start_fptr *%p = %p\n", &user_start_fptr, user_start_fptr);
 	if (user_start_fptr) {
-		//Cache_Read_Disable();
-		//CLEAR_PERI_REG_MASK(PERIPHS_DPORT_IRAM_MAPPING, IRAM_UNMAP_40108000 | IRAM_UNMAP_4010C000);
-
-		ets_install_uart_printf(0);
-		typedef union {
-			uint32_t v32;
-			uint8_t v8[4];
-		} conv_t;
-
-		ets_printf("\n\n\n");
-		uint32_t* ptr = (uint32_t*)user_start_fptr;
-		for (int i=0; i<32/4; i++) {
-			conv_t v = { .v32=ptr[i] };
-			ets_printf("%02x%02x%02x%02x", v.v8[0], v.v8[1], v.v8[2], v.v8[3]);
-		}
-
-		ets_printf("\n\n\n");
-		uint32_t programm_state;
-		asm volatile("rsr.ps %0" : "=r" (programm_state));
-		ets_printf("ps %x\n", programm_state);
-
-
-		for (uint32_t page=0;; page+=0x20000000) {
-			uint32_t iattr0 = 0xFFFFFFFF;;
-			asm volatile("ritlb0 %0, %1"
-				: "=r" (iattr0)
-				: "r" (page));
-			uint32_t iattr1 = 0xFFFFFFFF;;
-			asm volatile("ritlb1 %0, %1"
-				: "=r" (iattr1)
-				: "r" (page));
-			uint32_t dattr0 = 0xFFFFFFFF;;
-			asm volatile("rdtlb0 %0, %1"
-				: "=r" (dattr0)
-				: "r" (page));
-			uint32_t dattr1 = 0xFFFFFFFF;;
-			asm volatile("rdtlb1 %0, %1"
-				: "=r" (dattr1)
-				: "r" (page));
-			ets_printf("TLB %08x: %x %x %x %x\n",
-				page, iattr0, iattr1, dattr0, dattr1);
-			if (page >= 0xE0000000)
-				break;
-		}
-
-		// TODO fails with an exception
-		// Fatal exception (0): 
-		// epc1=0x4010f49b, epc2=0x00000000, epc3=0x00000000, excvaddr=0x00000000, depc=0x00000000		// Fatal exception (0):
-		// May be execution flag is not set for memory region
 		user_start_fptr();
 	}
 
@@ -280,11 +218,9 @@ critical_page:
 {
 	Wait_SPI_Idle(flashchip);
 
-	// TODO exception when calling uart_div_modify()
 	Cache_Read_Disable();
 	CLEAR_PERI_REG_MASK(PERIPHS_DPORT_IRAM_MAPPING, IRAM_UNMAP_40108000 | IRAM_UNMAP_4010C000);
 
-	//main_uart_dwnld();
 	_ResetHandler_uart_dwnld();
 }
 
