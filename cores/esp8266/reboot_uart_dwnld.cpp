@@ -26,7 +26,7 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 	// TODO may be it is part of _start()
 	// at least ets_intr_lock() is called in system_restart_local()
 	// Therefore unlock it here again to enable UART Rx IRQ
-	ets_intr_unlock();
+	//ets_intr_unlock();
 
 	uartAttach();
 	Uart_Init(0);
@@ -166,8 +166,7 @@ static inline void __wsr_vecbase(uint32_t vector_base) {
 //		*p = 0;
 //	}
 
-	//main_uart_dwnld();
-	main();
+	main_uart_dwnld();
 
 	while (true) {
 		/* raise DebugException */
