@@ -32,7 +32,7 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 	Uart_Init(0);
 	ets_install_uart_printf(0);
 
-//	boot_from_something_uart_dwnld(&user_start_fptr);
+	boot_from_something_uart_dwnld(&user_start_fptr);
 
 	// 0x4010e004 in case of esptool.py flasher stub
 	ets_printf("\n\n user_start_fptr *%p = %p\n", &user_start_fptr, user_start_fptr);
@@ -43,7 +43,7 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 		}
 	}
 
-//	_xtos_set_exception_handler(EXCCAUSE_UNALIGNED, window_spill_exc_handler);
+	_xtos_set_exception_handler(EXCCAUSE_UNALIGNED, print_fatal_exc_handler);
 	_xtos_set_exception_handler(EXCCAUSE_ILLEGAL, print_fatal_exc_handler);
 	_xtos_set_exception_handler(EXCCAUSE_INSTR_ERROR, print_fatal_exc_handler);
 	_xtos_set_exception_handler(EXCCAUSE_LOAD_STORE_ERROR, print_fatal_exc_handler);
