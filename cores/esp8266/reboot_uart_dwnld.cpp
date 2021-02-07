@@ -6,6 +6,8 @@
 #include <spi_flash.h>
 #include <esp8266_undocumented.h>
 
+extern int main();
+
 void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 {
 	/* simplified for following condition
@@ -164,7 +166,8 @@ static inline void __wsr_vecbase(uint32_t vector_base) {
 //		*p = 0;
 //	}
 
-	main_uart_dwnld();
+	//main_uart_dwnld();
+	main();
 
 	while (true) {
 		/* raise DebugException */
@@ -203,10 +206,11 @@ static inline void __wsr_vecbase(uint32_t vector_base) {
 	 * 0x60000000h	0xFFFFFFFFh	0x2	RWX, Bypass Cache
 	 */
 	uint32_t instruction_page = 0;
-	uint32_t page_of_this_func = 0x400000f3 & 0xe0000000;
+	uint32_t page_of_this_func = ((uint32_t)&&critical_page) & 0xe0000000;
 	for (uint32_t instruction_attr_list = 0x2222211f;; instruction_attr_list >>= 4) {
 		/* 0x400000f3 */
 		uint32_t attribute = instruction_attr_list & 0x0F;
+critical_page:
 		if (instruction_page == page_of_this_func) {
 			/* 0x400000e0 */
 			/* isync has to be executed immediately when changing
@@ -278,7 +282,7 @@ static inline void __wsr_vecbase(uint32_t vector_base) {
 	Wait_SPI_Idle(flashchip);
 
 	// TODO exception when calling uart_div_modify()
-	//Cache_Read_Disable();
+	Cache_Read_Disable();
 	CLEAR_PERI_REG_MASK(PERIPHS_DPORT_IRAM_MAPPING, IRAM_UNMAP_40108000 | IRAM_UNMAP_4010C000);
 
 	//main_uart_dwnld();
