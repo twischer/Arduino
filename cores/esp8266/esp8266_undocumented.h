@@ -32,6 +32,12 @@ extern int rom_i2c_readReg_Mask(int, int, int, int, int);
 
 extern int uart_baudrate_detect(int, int);
 
+/* SDK/Flash contains also an implementation of this function
+ * but for reboot into UART download mode the version from ROM
+ * has to be used because flash is not accessible.
+ */
+extern void rom_uart_div_modify(uint8 uart_no, uint32 DivLatchValue);
+
 /*
 ROM function, uart_buff_switch(), is used to switch printing between UART0 and
 UART1. It updates a structure that only controls a select group of print

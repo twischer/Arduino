@@ -280,6 +280,7 @@ PROVIDE ( rom_stop_tx_tone = 0x4000698c );
 PROVIDE ( rom_tx_mac_disable = 0x40006a98 );
 PROVIDE ( rom_tx_mac_enable = 0x40006ad4 );
 PROVIDE ( rom_txtone_linear_pwr = 0x40006a1c );
+PROVIDE ( rom_uart_div_modify = 0x400039d8 );
 PROVIDE ( rom_write_rfpll_sdm = 0x400078dc );
 PROVIDE ( roundup2 = 0x400031b4 );
 PROVIDE ( rtc_enter_sleep = 0x40002870 );

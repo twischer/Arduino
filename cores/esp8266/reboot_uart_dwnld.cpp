@@ -17,7 +17,7 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 
 	const uint32_t uart_no = 0;
 	const uint16_t divlatch = uart_baudrate_detect(uart_no, 0);
-	uart_div_modify(uart_no, divlatch);
+	rom_uart_div_modify(uart_no, divlatch);
 	UartDwnLdProc((uint8_t*)0x3fffa000, 0x2000, user_start_ptr);
 }
 
