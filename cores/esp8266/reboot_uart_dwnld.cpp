@@ -51,13 +51,13 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 
 	/* Moved from system_restart_core_uart_dwnld(). Not sure if it is required */
 	//Cache_Read_Disable();
-	//CLEAR_PERI_REG_MASK(PERIPHS_DPORT_24, 0x18);
+	//CLEAR_PERI_REG_MASK(PERIPHS_DPORT_IRAM_MAPPING, IRAM_UNMAP_40108000 | IRAM_UNMAP_4010C000);
 
 	// 0x4010f498 in case of esptool.py --no-stub ...
 	ets_printf("\n\n user_start_fptr *%p = %p\n", &user_start_fptr, user_start_fptr);
 	if (user_start_fptr) {
-		Cache_Read_Disable();
-		CLEAR_PERI_REG_MASK(PERIPHS_DPORT_IRAM_MAPPING, IRAM_UNMAP_40108000 | IRAM_UNMAP_4010C000);
+		//Cache_Read_Disable();
+		//CLEAR_PERI_REG_MASK(PERIPHS_DPORT_IRAM_MAPPING, IRAM_UNMAP_40108000 | IRAM_UNMAP_4010C000);
 
 		ets_install_uart_printf(0);
 		typedef union {
@@ -148,7 +148,7 @@ static inline void __wsr_vecbase(uint32_t vector_base) {
        	asm volatile("wsr.vecbase %0" :: "r" (vector_base));
 }
 
-[[noreturn]] void _start_uart_dwnld()
+[[noreturn]] void ICACHE_RAM_ATTR _start_uart_dwnld()
 {
 	/* Set the program state register
 	 * Name				Value	Description
@@ -173,7 +173,7 @@ static inline void __wsr_vecbase(uint32_t vector_base) {
 }
 
 
-[[noreturn]] void _ResetHandler_uart_dwnld()
+[[noreturn]] void ICACHE_RAM_ATTR _ResetHandler_uart_dwnld()
 {
 	/* disable all level 1 interrupts */
 	__wsr_intenable(0);
@@ -279,9 +279,10 @@ static inline void __wsr_vecbase(uint32_t vector_base) {
 
 	// TODO exception when calling uart_div_modify()
 	//Cache_Read_Disable();
-	//CLEAR_PERI_REG_MASK(PERIPHS_DPORT_IRAM_MAPPING, IRAM_UNMAP_40108000 | IRAM_UNMAP_4010C000);
+	CLEAR_PERI_REG_MASK(PERIPHS_DPORT_IRAM_MAPPING, IRAM_UNMAP_40108000 | IRAM_UNMAP_4010C000);
 
-	main_uart_dwnld();
+	//main_uart_dwnld();
+	_ResetHandler_uart_dwnld();
 }
 
 [[noreturn]] void system_restart_local_uart_dwnld()
