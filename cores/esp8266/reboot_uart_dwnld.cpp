@@ -100,6 +100,13 @@ static inline void __wsr_vecbase(uint32_t vector_base) {
 
 [[noreturn]] void ICACHE_RAM_ATTR _start_uart_dwnld()
 {
+	ets_install_uart_printf(0);
+	ets_printf("\nBEFORE\n");
+	/* Set up stack at 0x3FFFFFFF */
+	const uint32_t stack_pointer = 0x3ffef910;//0x3FFFFFFF;
+	asm volatile("mov a1, %0" :: "r" (stack_pointer));
+	ets_printf("\nAFTER\n");
+
 	/* Set the program state register
 	 * Name				Value	Description
 	 * Interupt level disable	0	enable all interrupt levels
