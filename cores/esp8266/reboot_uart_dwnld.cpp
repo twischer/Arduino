@@ -46,15 +46,6 @@ void ICACHE_RAM_ATTR boot_from_something_uart_dwnld(void (**user_start_ptr)())
 	_xtos_set_exception_handler(EXCCAUSE_PRIVILEGED, print_fatal_exc_handler);
 
 	if (user_start_fptr) {
-		ets_printf("\n\n%p\n", user_start_fptr);
-		uint32_t* data = (uint32_t*)0x4010e000;
-		for (uint32_t i=0; i<0xD0/4; i++) {
-			uint32_t tmp = data[i];
-			uint8_t* tmp8 = (uint8_t*)&tmp;
-			ets_printf("0x%02x 0x%02x 0x%02x 0x%02x ", tmp8[0], tmp8[1], tmp8[2], tmp8[3]);
-		}
-		ets_printf("\n\n\n");
-
 		user_start_fptr();
 	}
 
@@ -102,27 +93,9 @@ extern "C" int ets_memcmp (const void*, const void*, size_t n);
 
 [[noreturn]] void ICACHE_RAM_ATTR _start_uart_dwnld()
 {
-	ets_install_uart_printf(0);
-	_xtos_set_exception_handler(EXCCAUSE_UNALIGNED, print_fatal_exc_handler);
-	_xtos_set_exception_handler(EXCCAUSE_ILLEGAL, print_fatal_exc_handler);
-	_xtos_set_exception_handler(EXCCAUSE_INSTR_ERROR, print_fatal_exc_handler);
-	_xtos_set_exception_handler(EXCCAUSE_LOAD_STORE_ERROR, print_fatal_exc_handler);
-	_xtos_set_exception_handler(EXCCAUSE_LOAD_PROHIBITED, print_fatal_exc_handler);
-	_xtos_set_exception_handler(EXCCAUSE_STORE_PROHIBITED, print_fatal_exc_handler);
-	_xtos_set_exception_handler(EXCCAUSE_PRIVILEGED, print_fatal_exc_handler);
-
-	uint8_t* stack = (uint8_t*)0x3FFFFFFF;
-	uint32_t orig[32];
-	ets_memcpy(orig, stack-sizeof(orig), sizeof(orig));
-
-	ets_printf("\nBEFORE\n");
-
-	ets_printf("CMP %d\n", ets_memcmp(orig, stack-sizeof(orig), sizeof(orig)));
-
-	/* Set up stack at 0x3FFFFFFF */
-	const uint32_t stack_pointer = /*0x3ffef910;*/0x3FFFFFFF;
+	/* Set stack pointer to upper end of data RAM */
+	const uint32_t stack_pointer = 0x40000000;
 	asm volatile("mov a1, %0" :: "r" (stack_pointer));
-	ets_printf("\nAFTER\n");
 
 	/* Set the program state register
 	 * Name				Value	Description
