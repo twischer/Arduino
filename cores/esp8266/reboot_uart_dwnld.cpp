@@ -98,12 +98,29 @@ static inline void __wsr_vecbase(uint32_t vector_base) {
        	asm volatile("wsr.vecbase %0" :: "r" (vector_base));
 }
 
+extern "C" int ets_memcmp (const void*, const void*, size_t n);
+
 [[noreturn]] void ICACHE_RAM_ATTR _start_uart_dwnld()
 {
 	ets_install_uart_printf(0);
+	_xtos_set_exception_handler(EXCCAUSE_UNALIGNED, print_fatal_exc_handler);
+	_xtos_set_exception_handler(EXCCAUSE_ILLEGAL, print_fatal_exc_handler);
+	_xtos_set_exception_handler(EXCCAUSE_INSTR_ERROR, print_fatal_exc_handler);
+	_xtos_set_exception_handler(EXCCAUSE_LOAD_STORE_ERROR, print_fatal_exc_handler);
+	_xtos_set_exception_handler(EXCCAUSE_LOAD_PROHIBITED, print_fatal_exc_handler);
+	_xtos_set_exception_handler(EXCCAUSE_STORE_PROHIBITED, print_fatal_exc_handler);
+	_xtos_set_exception_handler(EXCCAUSE_PRIVILEGED, print_fatal_exc_handler);
+
+	uint8_t* stack = (uint8_t*)0x3FFFFFFF;
+	uint32_t orig[32];
+	ets_memcpy(orig, stack-sizeof(orig), sizeof(orig));
+
 	ets_printf("\nBEFORE\n");
+
+	ets_printf("CMP %d\n", ets_memcmp(orig, stack-sizeof(orig), sizeof(orig)));
+
 	/* Set up stack at 0x3FFFFFFF */
-	const uint32_t stack_pointer = 0x3ffef910;//0x3FFFFFFF;
+	const uint32_t stack_pointer = /*0x3ffef910;*/0x3FFFFFFF;
 	asm volatile("mov a1, %0" :: "r" (stack_pointer));
 	ets_printf("\nAFTER\n");
 
